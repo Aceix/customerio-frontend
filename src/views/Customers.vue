@@ -19,14 +19,21 @@
       <div class="col-6">
         View
         <div class="btn-group" role="group" aria-label="Toggle customers view">
-          <button type="button" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-table"></i>
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-primary">
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            :class="{ 'active': currentView === 'card' }"
+            @click="currentView = 'card'"
+          >
             <i class="bi bi-card-list"></i>
           </button>
-          <button type="button" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-square"></i>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            :class="{ 'active': currentView === 'table' }"
+            @click="currentView = 'table'"
+          >
+            <i class="bi bi-table"></i>
           </button>
         </div>
       </div>
@@ -38,59 +45,51 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col">
-
-        <div class="card" style="width: 18rem;">
-          <template v-if="attributes.get('img')">
-            <img :src="attributes.get('img')" class="card-img-top" alt="profile picture" />
-          </template>
-          <div class="card-body">
-            <h5 class="card-title">{{ getTitle() }}</h5>
-            <p class="card-text">
-              Some quick example text to build on the card title and make up the bulk of the card's content.
-            </p>
-            <button class="btn btn-sm btn-primary">View details</button>
-          </div>
-        </div>
-
-        <div class="card" style="width: 18rem;">
-          <template v-if="attributes.get('img')">
-            <img :src="attributes.get('img')" class="card-img-top" alt="profile picture" />
-          </template>
-          <div class="card-body">
-            <h5 class="card-title">{{ getTitle() }}</h5>
-            <p class="card-text">
-              Some quick example text to build on the card title and make up the bulk of the card's content.
-            </p>
-            <button class="btn btn-sm btn-primary">View details</button>
-          </div>
-        </div>
-
+    <div v-if="currentView === 'card'" class="row mt-2">
+      <div class="col-6 mr-2 mb-2 col-md-3" v-for="customer in customers">
+        <CustomerCard :customer="customer" />
       </div>
+    </div>
+    <div v-else-if="currentView === 'table'" class="row mt-2">
+      table view
     </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
+import CustomerCard from '../components/CustomerCard.vue';
+import Customer from '../models/Customer.model';
+import CustomersService from '../services/customers.service';
+import { useToast } from "vue-toastification";
 
-const attributes = ref<Map<string, string>>(new Map())
+type AllowedViews = 'card' | 'table';
+
+const toast = useToast()
+const currentView = ref<AllowedViews>('card');
+const customers = ref<Customer[]>([])
+
 
 function loadCustomer() {
-  attributes.value = new Map([
-    ['img', 'https://via.placeholder.com/150'],
-    ['name', 'John Doe'],
-    ['email', ''],
-  ])
+  // customers.value = [
+  //   { id: 'a123', attributes: new Map([['first_name', 'Ama'], ['last_name', 'Governor'], ['email', 'ama.governor@example.com']]) },
+  //   { id: 'a123', attributes: new Map([['email', 'ama.governor2@example.com']]) },
+  //   { id: 'a123', attributes: new Map([['email', 'ama.governor2@example.com']]) },
+  //   { id: 'a123', attributes: new Map([['email', 'ama.governor2@example.com']]) },
+  //   { id: 'a123', attributes: new Map([['email', 'ama.governor2@example.com']]) },
+  //   { id: 'a123', attributes: new Map([['email', 'ama.governor2@example.com']]) },
+  // ]
+  CustomersService.getCustomers()
+    .then(res => {
+      customers.value = res.data.customers
+    })
+    .catch((err) => {
+      toast.error(`Failed to load customers \n${err}`)
+    })
 }
 
-function getTitle() {
-  return attributes.value.get('name') || 'Customer';
-}
-
-onMounted(() => {
+onBeforeMount(() => {
   loadCustomer();
 });
 
