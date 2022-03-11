@@ -137,11 +137,11 @@
         EVENTS TIMELINE
         <TimelineEvent
           class="mt-3"
-          :event="{ data: '/store', type: 'page-visit', dateTime: Date() }"
+          :event="{ data: '/dummy-page', type: 'page-visit', dateTime: Date() }"
         />
         <TimelineEvent
           class="mt-3"
-          :event="{ data: '{name: Kwame}', type: 'attribute-change', dateTime: Date() }"
+          :event="{ data: '{ name: Kwesi }', type: 'attribute-change', dateTime: Date() }"
         />
       </div>
     </div>

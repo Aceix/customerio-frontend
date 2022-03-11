@@ -4,10 +4,6 @@
       <div class="col">
         <i :class="getEventIcon()"></i>
         <span class="m-2">{{ getEventName() }}</span>
-        <!-- <span
-          class="position-absolute"
-          style="margin-right: -1.1rem; font-size: 2rem; position: absolute; right: 0.75rem; top: 0"
-        >&bullet;</span>-->
       </div>
     </div>
     <div class="row">
@@ -65,6 +61,5 @@ function getEventName() {
   width: 100%;
   border-top: 1px solid black;
   margin-top: 50%;
-  /* line-height: 50%; */
 }
 </style>
