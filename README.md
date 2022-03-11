@@ -1,11 +1,30 @@
-# Vue 3 + Typescript + Vite
+Frontend to manage customers
+
+## Setup
+
+You  need to have [node](https://nodejs.org) and [yarn](https://yarnpkg.com/) installed run this app.
+
+- Clone the repo
+- cd into repo directory
+- Create .env file (see below)
+- Run `yarn` to install dependencies
+- Run `yarn run dev` to start a dev server
+- Open the browser at the specified location
+
+## Setup .env
+
+- Create a `.env` file in the repo directory (`touch .env`)
+- Following the format in `.env.sample`, specify the api server base url to connect to. eg: `VITE_API_BASE_URL=http://localhost:1323`
+
+---
+### Vue 3 + Typescript + Vite
 
 This template should help get you started developing with Vue 3 and Typescript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-## Recommended IDE Setup
+#### Recommended IDE Setup
 
 - [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
 
-## Type Support For `.vue` Imports in TS
+#### Type Support For `.vue` Imports in TS
 
 Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's `.vue` type support plugin by running `Volar: Switch TS Plugin on/off` from VSCode command palette.

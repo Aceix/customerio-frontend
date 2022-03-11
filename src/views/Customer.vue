@@ -65,6 +65,7 @@
                   type="text"
                   class="form-control form-control-sm"
                   aria-label="attribute value"
+                  :disabled="immutableAttributes.includes(attributeName)"
                   v-model="customerAttributesEditForm[attributeName]"
                 />
                 <span v-else>{{ customer?.attributes[attributeName] }}</span>
@@ -167,6 +168,7 @@ const props = defineProps<{
 
 const customer = ref<Customer | null>(null);
 const toast = useToast();
+const immutableAttributes = ref(['email', 'created_at'])
 
 function loadCustomer() {
   CustomerService.getCustomer(props.id)
