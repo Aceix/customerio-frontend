@@ -9,14 +9,15 @@
       <small>{{ customer.attributes.email }}</small>
     </template>
     <h5 v-else class="card-title">{{ customer.attributes.email }}</h5>
-    
-    <button class="btn btn-sm btn-primary mt-2">View details</button>
+    <br>
+    <router-link :to="`/customers/${customer.id}`" class="btn btn-sm btn-primary mt-2">View details</router-link>
   </div>
 </div>
 </template>
 
 
 <script setup lang="ts">
+import { customerHasName, getCustomerName } from '../customer-utils';
 import Customer from '../models/Customer.model';
 
 const props = defineProps<{
@@ -24,12 +25,11 @@ const props = defineProps<{
 }>()
 
 function hasName() {
-  return props.customer.attributes.first_name || props.customer.attributes.last_name
+  return customerHasName(props.customer);
 }
 
 function getName() {
-  const customerAttributes = props.customer.attributes;
-  return `${customerAttributes.first_name ?? ''} ${customerAttributes.last_name ?? ''}`
+  return getCustomerName(props.customer);
 }
 </script>
 
