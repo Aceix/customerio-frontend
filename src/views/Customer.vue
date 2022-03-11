@@ -1,11 +1,11 @@
 <template>
-  <div class="Customer container">
+  <div class="Customer container mb-4">
     <div class="row">
       <!-- profile pane -->
       <div class="col-12 col-md-4">
         <div class="row">
           <div class="col text-center">
-            <img :src="customerProfileImg" alt="profile picture" class="img-rounded" />
+            <img :src="customerProfileImg" alt="profile picture" class="img-rounded profile-img" />
           </div>
         </div>
 
@@ -14,9 +14,12 @@
             <h5>{{ customerTitle }}</h5>
           </div>
           <div class="col-12">
-            <p>Has been registered for {{ getCustomerRegisteredPeriod() }}</p>
+            <p>Joined on {{ customerJoinDate }}</p>
           </div>
-          <div class="col-12">EVENT COUNT PIE CHART</div>
+          <div class="col-12">
+            <h5>Event summary</h5>
+            <apexchart type="donut" :options="eventsChartOptions" :series="eventsChartData"></apexchart>
+          </div>
         </div>
 
         <div class="row mt-3">
@@ -156,22 +159,16 @@ import Customer from '../models/Customer.model';
 import CustomerService from '../services/customers.service';
 import TimelineEvent from '../components/TimelineEvent.vue';
 import dayjs from 'dayjs';
-import 'dayjs/plugin/relativeTime'
-import { PieChart, usePieChart } from 'vue-chart-3'
 import { customerHasName, getCustomerName } from '../customer-utils';
 
 const props = defineProps<{
   id: string,
-  customer?: Customer,
 }>()
 
 const customer = ref<Customer | null>(null);
 const toast = useToast();
 
 function loadCustomer() {
-  if (props.customer) {
-    customer.value = props.customer;
-  }
   CustomerService.getCustomer(props.id)
     .then(res => {
       customer.value = res.data?.customer;
@@ -182,7 +179,7 @@ function loadCustomer() {
 }
 
 const customerProfileImg = computed(() => {
-  return customer.value?.attributes.image_url || 'https://via.placeholder.com/150'
+  return customer.value?.attributes.image_url || 'https://images.pexels.com/photos/4668511/pexels-photo-4668511.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
 })
 
 const customerTitle = computed(() => {
@@ -196,10 +193,32 @@ const customerTitle = computed(() => {
   return customer.value.attributes.email
 })
 
-function getCustomerRegisteredPeriod() {
-  // return dayjs().from(dayjs(customer.value?.attributes?.created_at))
-}
+const customerJoinDate = computed(() => {
+  return dayjs(customer.value?.attributes.created_at).format('MMM DD, YYYY HH:MM')
+})
 
+const eventsChartData = computed(() => {
+  // return Object.keys(customer.value?.events ?? {})
+  return [1, 2, 3, 4, 5]
+})
+
+const eventsChartOptions = computed<any>(() => {
+  return {
+    chart: {
+      type: 'donut',
+    },
+    responsive: [{
+      breakpoint: 480,
+      options: {
+        // xaxis: Object.keys(customer.value?.events ?? {}),
+        xaxis: ['event-1', 'event-2', 'event-3', 'event-4', 'event-5'],
+        legend: {
+          display: false
+        }
+      }
+    }]
+  }
+})
 
 const isAddingAttribute = ref(false);
 const customerAttributesAddForm = ref({ name: '', value: '' });
@@ -251,7 +270,7 @@ function onEditAttributesBtnClick() {
 }
 
 function onEditAttribute() {
-  if(!isEditAttributeFormValid()) {
+  if (!isEditAttributeFormValid()) {
     return
   }
 
@@ -280,6 +299,10 @@ onBeforeMount(() => {
 </script>
 
 <style scoped lang="scss">
+.profile-img {
+  height: 200px;
+}
+
 #attributes-box {
   max-height: 35vh;
   overflow-y: auto;

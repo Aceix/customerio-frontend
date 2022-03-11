@@ -55,7 +55,7 @@
             <CustomerCard :customer="customer" />
           </div>
         </div>
-        <div class="row mt-2">
+        <div v-if="displayedCustomers.length" class="row mt-2">
           <div class="col text-end">
             <button
               class="btn btn-sm btn-outline-primary me-2"
