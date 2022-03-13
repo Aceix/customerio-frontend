@@ -23,6 +23,7 @@
     "vue3-apexcharts": "^1.4.1"
   },
   "devDependencies": {
+    "@types/bootstrap": "^5.1.9",
     "@types/node": "^17.0.21",
     "@vitejs/plugin-vue": "^2.2.0",
     "happy-dom": "^2.46.3",
