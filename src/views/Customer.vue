@@ -11,7 +11,35 @@
 
         <div class="row mt-2">
           <div class="col-12">
-            <h5>{{ customerTitle }}</h5>
+            <h5>
+              {{ customerTitle }}
+              <template v-if="isDeleting">
+                <span class="float-end">
+                  <button
+                    class="btn btn-sm btn-outline-danger me-2"
+                    title="Cancel delete"
+                    @click="isDeleting = false"
+                  >
+                    <i class="bi bi-x"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-success"
+                    title="Confirm delete"
+                    @click="onDeleteCustomer()"
+                  >
+                    <i class="bi bi-check"></i>
+                  </button>
+                </span>
+              </template>
+              <button
+                v-else
+                class="btn btn-sm btn-outline-danger float-end"
+                title="Delete customer"
+                @click="isDeleting = true"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </h5>
           </div>
           <div class="col-12">
             <p>Joined on {{ customerJoinDate }}</p>
@@ -161,6 +189,7 @@ import CustomerService from '../services/customers.service';
 import TimelineEvent from '../components/TimelineEvent.vue';
 import dayjs from 'dayjs';
 import { customerHasName, getCustomerName } from '../customer-utils';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   id: string,
@@ -169,6 +198,7 @@ const props = defineProps<{
 const customer = ref<Customer | null>(null);
 const toast = useToast();
 const immutableAttributes = ref(['email', 'created_at'])
+const router = useRouter()
 
 function loadCustomer() {
   CustomerService.getCustomer(props.id)
@@ -292,6 +322,24 @@ function onEditAttribute() {
 
 function isEditAttributeFormValid() {
   return true
+}
+
+
+const isDeleting = ref(false);
+
+function onDeleteCustomer() {
+  if (!customer.value) {
+    return
+  }
+
+  CustomerService.deleteCustomer(customer.value.id)
+    .then(() => {
+      toast.success('Customer deleted successfully');
+      router.push('/')
+    })
+    .catch(() => {
+      toast.error('Failed to delete customer');
+    })
 }
 
 onBeforeMount(() => {
