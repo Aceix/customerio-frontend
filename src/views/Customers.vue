@@ -35,7 +35,11 @@
         </div>
       </div>
       <div class="col-6 text-end">
-        <button class="btn btn-primary">
+        <button
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#create-customer-modal"
+        >
           <i class="bi bi-plus"></i>
           Add Customer
         </button>
@@ -51,7 +55,7 @@
       </div>
       <template v-else>
         <div class="row mt-2">
-          <div class="col-6 mr-2 mb-2 col-md-3" v-for="customer in displayedCustomers">
+          <div class="col-12 mr-2 mb-2 col-md-3" v-for="customer in displayedCustomers">
             <CustomerCard :customer="customer" />
           </div>
         </div>
@@ -75,6 +79,82 @@
       <div class="row mt-2">table view</div>
     </template>
   </div>
+
+  <!-- create customer modal -->
+  <div
+    class="modal"
+    id="create-customer-modal"
+    tabindex="-1"
+    aria-label="create customer modal"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create a customer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form ref="createCustomerFormRef" @submit="onCreateCustomer">
+            <div class="row mb-2">
+              <div class="col-3">
+                <div class="form-group">
+                  <label for="customer-id">ID *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="customer-id"
+                    placeholder="Enter customer ID"
+                    v-model="createCustomerForm.id"
+                    required
+                    min="1"
+                  />
+                  <span class="invalid-feedback">ID must be greater than 0</span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-group">
+                  <label for="customer-email">Email *</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="customer-email"
+                    placeholder="Enter customer email"
+                    v-model="createCustomerForm.attributes.email"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="customer-first-name">First name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="customer-first-name"
+                placeholder="Enter customer first name"
+                v-model="createCustomerForm.attributes.first_name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="customer-last-name">Last name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="customer-last-name"
+                placeholder="Enter customer last name"
+                v-model="createCustomerForm.attributes.last_name"
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" @click="onCreateCustomer">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -83,6 +163,7 @@ import CustomerCard from '../components/CustomerCard.vue';
 import Customer from '../models/Customer.model';
 import CustomersService from '../services/customers.service';
 import { useToast } from "vue-toastification";
+import * as bootstrap from 'bootstrap'
 
 type AllowedViews = 'card' | 'table';
 
@@ -91,7 +172,7 @@ const currentView = ref<AllowedViews>('card');
 const customers = ref<Customer[]>([])
 const loading = ref(false);
 
-function loadCustomer() {
+function loadCustomers() {
   loading.value = true;
   CustomersService.getCustomers()
     .then(res => {
@@ -126,8 +207,68 @@ const displayedCustomers = computed(() => {
     .slice((pagination.page - 1) * pagination.perPage, pagination.page * pagination.perPage);
 })
 
+const createCustomerFormRef = ref<HTMLFormElement>();
+const createCustomerForm = ref({ id: 0, attributes: { email: '', first_name: '', last_name: '' } })
+
+function onCreateCustomer() {
+  if (!isCreateCustomerFormValid()) {
+    return;
+  }
+
+  const newCustomer: Customer = {
+    id: createCustomerForm.value.id,
+    attributes: createCustomerForm.value.attributes,
+    events: {}
+  }
+  CustomersService.createCustomer(newCustomer)
+    .then(() => {
+      toast.success('Customer created successfully')
+      createCustomerForm.value = { id: 0, attributes: { email: '', first_name: '', last_name: '' } }
+      loadCustomers();
+      hideBreateCustomerModal()
+    })
+    .catch((err) => {
+      toast.error(`Failed to create customer.\n${err.message}`)
+    })
+    .finally(() => {
+      createCustomerFormRef.value?.classList.remove('was-validated');
+    })
+}
+
+function isCreateCustomerFormValid() {
+  const emailPattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  createCustomerFormRef.value?.classList.add('was-validated');
+
+  if (createCustomerForm.value.id <= 0) {
+    return false;
+  }
+  if (
+    !createCustomerForm.value.attributes.email
+      .toLowerCase()
+      .match(emailPattern)
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function hideBreateCustomerModal() {
+  const createCustomerModalEl = document.getElementById('create-customer-modal')
+  if (createCustomerModalEl) {
+    bootstrap.Modal.getInstance(createCustomerModalEl)?.hide()
+  }
+  // needed due to bug in bootstrap
+  document.getElementsByClassName('modal-backdrop')?.[0].remove()
+  const bodyEl = document.getElementsByTagName('body')[0]
+  if (bodyEl) {
+    bodyEl.classList.remove('modal-open')
+    bodyEl.style.paddingRight = '0px'
+    bodyEl.style.overflow = 'auto'
+  }
+}
+
 onBeforeMount(() => {
-  loadCustomer();
+  loadCustomers();
 });
 
 </script>
